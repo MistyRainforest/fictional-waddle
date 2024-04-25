@@ -24,8 +24,13 @@ class  CraigslistScraper(Scraper):
         entryPages = [] # entryPages are URLs of each possible entry
         # get all values and init Property objects
         posts = html_soup.find_all('a', href=True)
-        print(posts)
+        #print(posts)
         for post in posts:
             if len(post.get("href")) > 20:
-                entryPages += [Property(post.get("price"), self.rooms, post.get("href"))]
+                response = requests.get(post.get("href"))
+                html_soup = BeautifulSoup(response.text, "html.parser")
+                loc = html_soup.find('div', id="map")
+                property = Property(post.get("price"), self.rooms, post.get("href"))
+                property.setLocation(loc.get("data-latitude"), loc.get("data-longitude"))
+                entryPages += [property]
         return entryPages
